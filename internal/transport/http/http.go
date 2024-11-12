@@ -1,6 +1,8 @@
 package hhttp
 
 import (
+	"net/http"
+
 	"github.com/gintokos/vpagrSite/internal/config"
 	"github.com/gintokos/vpagrSite/internal/transport/http/auth"
 
@@ -27,7 +29,7 @@ func NewServer(lg *logger.CustomLogger, cfg *config.ServerConfig) *Server {
 }
 
 func (s *Server) MustStartServer() {
-	s.initHandlers()
+	s.InitRoutes()
 	s.Logger.Info("Handlers was inited")
 
 	err := s.Run(s.Config.Port)
@@ -36,6 +38,13 @@ func (s *Server) MustStartServer() {
 	}
 }
 
-func (s *Server) initHandlers() {
-	auth.InitHanlers(s.Engine, *s.Logger)
+func (s *Server) InitRoutes() {
+	a := auth.InitRoutes(s.Engine, *s.Logger)
+
+	authedRouterCroup := s.Group("/")
+	authedRouterCroup.Use(a.AuthMiddleware())
+	
+	authedRouterCroup.GET("/profile", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "Welcome to your profile"})
+	})
 }

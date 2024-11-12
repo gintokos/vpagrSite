@@ -12,7 +12,7 @@ type userTokenStore struct {
 }
 
 type userToken struct {
-	telegramID string
+	telegramID int64
 	expiredAt  time.Time
 }
 
@@ -26,23 +26,23 @@ func newTokenStore(ttl time.Duration) *userTokenStore {
 	return st
 }
 
-func (st *userTokenStore) SaveUserToken(utoken string, tID string) {
+func (st *userTokenStore) SaveUserToken(utoken string, tID int64) {
 	st.mu.Lock()
 	defer st.mu.Unlock()
 
 	st.userTokens[utoken] = &userToken{
 		telegramID: tID,
-		expiredAt: time.Now().Add(st.ttl),
+		expiredAt:  time.Now().Add(st.ttl),
 	}
 }
 
-func (st *userTokenStore) ValidateUserToken(utoken string) (valid bool, telegramID string) {
+func (st *userTokenStore) ValidateUserToken(utoken string) (valid bool, telegramID int64) {
 	st.mu.Lock()
 	defer st.mu.Unlock()
 
 	token, exists := st.userTokens[utoken]
 	if !exists || time.Now().After(token.expiredAt) {
-		return false, ""
+		return false, 0
 	}
 
 	delete(st.userTokens, utoken)

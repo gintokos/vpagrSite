@@ -64,7 +64,7 @@ func (b *Bot) Start() {
 				str := strconv.FormatInt(update.Message.Chat.ID, 10) + timenow
 
 				utoken := getUserTokenstring(str, b.usertokensize)
-				b.ustore.SaveUserToken(utoken, strconv.FormatInt(update.Message.Chat.ID, 10))
+				b.ustore.SaveUserToken(utoken, update.Message.Chat.ID)
 
 				loginlink := b.link + utoken
 
@@ -78,7 +78,7 @@ func (b *Bot) Start() {
 	}
 }
 
-func (b *Bot) IsUsertokenExists(usertoken string) (exists bool, telegramID string) {
+func (b *Bot) IsUsertokenExists(usertoken string) (exists bool, telegramID int64) {
 	return b.ustore.ValidateUserToken(usertoken)
 }
 

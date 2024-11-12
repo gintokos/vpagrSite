@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"time"
+
 	"github.com/gintokos/vpagrSite/internal/config"
+	"github.com/gintokos/vpagrSite/internal/data/db"
 	"github.com/gintokos/vpagrSite/internal/domain/models"
 
 	generated "github.com/gintokos/serverdb/protos/gen/v1"
@@ -50,6 +52,9 @@ func (g *Grpcdb) CreateUser(ctx context.Context, id int64) error {
 
 	res, err := g.client.CreateUser(ctx, req)
 	if err != nil {
+		if err.Error() == "rpc error: code = Unknown desc = record with this id was created before" {
+			return db.ErrUserAlreadyExists
+		}
 		return err
 	}
 	return g.HandleErrInResult(res.Error)
